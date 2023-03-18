@@ -9,28 +9,38 @@
         integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
 </head>
 
-<body>
+<body style="background-color: rgb(15,15,15); color: white;">
     <div class="container p-2">
         <h1>Product Listing Page</h1>
         <div class="row">
-            <div class="col-12 col-md-6">
+            <div class="col-12 col-md-4">
                 <form>
                     <div class="form-group">
-                        <label>Choose price range</label>
-                        <input type="number" class="form-control low_price" id="Enter-ProductType" placeholder="Enter Low Price (default: 0)">
-                        <input type="number" class="form-control high_price" id="Enter-ProductType" placeholder="Enter High Price (default: 2147483647)">
+                        <label>Enter product number or product name</label>
+                        <input class="form-control product_search" placeholder="Enter product number or product name">
                     </div>
                 </form>
             </div>
-            <div class="col-12 col-md-6">
+            <div class="col-12 col-md-4">
+                <form>
+                    <div class="form-group">
+                        <label>Choose price range</label>
+                        <input type="number" class="form-control low_price" placeholder="Enter Low Price (default: 0)">
+                        <input type="number" class="form-control high_price"
+                            placeholder="Enter High Price (default: 2147483647)">
+                    </div>
+                </form>
+            </div>
+            <div class="col-12 col-md-4">
                 <label>Choose product type</label>
-                <select class="form-select" aria-label="Default select example">
+                <select class="form-select product_type" aria-label="Default select example">
                     <option selected>Open this select menu</option>
                 </select>
             </div>
         </div>
-        <button class="search_btn m-2">Search</button>
-        <div class="col-12 search_list d-flex flex-wrap"></div>
+        <button class="btn btn-primary search_btn m-2">Search</button>
+        <div class="col-12 search_list d-flex flex-wrap">
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"
@@ -46,59 +56,71 @@
 
         window.onload = function () {
             Create_Search_List();
+            Search_Result_List();
         }
         btn_search.addEventListener("click", Search_Result_List);
-
         function Search_Result_List() {
             search_list = document.querySelector(".search_list");
             search_list.innerText = "";
             let search_condition_ProductType = document.querySelector("select").value;
             let search_condition_low_price = document.querySelector(".low_price").value;
             let search_condition_high_price = document.querySelector(".high_price").value;
-            if (search_condition_low_price == "" || search_condition_low_price < 0){
+            let search_condition_num_name = document.querySelector(".product_search").value;
+            if (search_condition_low_price == "" || search_condition_low_price < 0) {
                 search_condition_low_price = 0;
                 document.querySelector(".low_price").value = "0";
             }
-            if (search_condition_high_price == ""){
+            if (search_condition_high_price == "") {
                 search_condition_high_price = 2147483647;
                 document.querySelector(".high_price").value = "2147483647";
             }
-            if (search_condition_high_price < search_condition_low_price){
+            if (search_condition_high_price < search_condition_low_price) {
                 let temp = search_condition_high_price;
                 search_condition_high_price = search_condition_low_price;
-                document.querySelector(".high_price").value = search_condition_low_price;
+                document.querySelector(".high_price").value = search_condition_high_price;
                 search_condition_low_price = temp;
                 document.querySelector(".low_price").value = search_condition_low_price;
             }
             arr = [];
-            if (search_condition_ProductType == "All"){
-                arr = product.filter((_element) => {
-                return _element.Price >= search_condition_low_price && _element.Price <= search_condition_high_price;
+            arr = product.filter((_element) => {
+                return _element.ProductNumber.toLowerCase() == search_condition_num_name.toLowerCase() && _element.Price >= search_condition_low_price && _element.Price <= search_condition_high_price;
             });
-            }
-            else{
+            if (arr == "") {
                 arr = product.filter((_element) => {
-                return _element.Price >= search_condition_low_price && _element.Price <= search_condition_high_price && _element.ProductType == search_condition_ProductType;
-            });
+                    return _element.ProductName.toLowerCase().includes(search_condition_num_name.toLowerCase()) && _element.Price >= search_condition_low_price && _element.Price <= search_condition_high_price;
+                });
             }
-            
+
+            if (search_condition_ProductType != "All") {
+                arr = arr.filter((_element) => {
+                    return _element.ProductType == search_condition_ProductType;
+                });
+            }
             if (arr.length > 0) {
                 arr.forEach(element => {
                     let div = document.createElement("div");
+                    let img = document.createElement("img");
                     let p;
-                    div.setAttribute('class','col-12 col-md-3 p-2');
-                    div.setAttribute('style','background-color: black; border: 1px solid white; color: white;');
+                    img.setAttribute('src', 'https://picsum.photos/300/200/?random=10');
+                    img.setAttribute('class', 'm-auto d-block');
+                    div.append(img);
+                    div.setAttribute('class', 'col-12 col-md-3 p-2');
+                    div.setAttribute('style', 'background-color: rgb(15,15,15); border: 1px solid white; color: white; position: relative;');
                     Object.entries(element).forEach(_element => {
                         p = document.createElement("p");
-                        if (_element[0] == "Amount" && _element[1] == 0){
-                            p.setAttribute('style','color: red;');
+                        p.setAttribute('class', 'my-2');
+                        if (_element[0] == "Amount" && _element[1] == 0) {
                             p.innerText = `${_element[0]}: ${_element[1]}`;
-                        }else{
+                            let hover = document.createElement("p");
+                            hover.setAttribute('style', 'color: red; position: absolute; left: 0; top: 0; right: 0; bottom: 0; font-size: 48px; background-color: #ffffff75;');
+                            hover.setAttribute('class', 'mb-0');
+                            hover.innerText = "Sold out";
+                            div.append(hover);
+                        } else {
                             p.innerText = `${_element[0]}: ${_element[1]}`;
                         }
                         div.append(p);
                     });
-                    
                     search_list.append(div);
                 });
                 container.append(search_list);
@@ -113,7 +135,7 @@
         }
 
         function Create_Search_List() {
-            let select = document.querySelector("select");
+            let select = document.querySelector(".product_type");
             select.innerText = "";
             arr = product.filter((_element) => {
                 return _element;
