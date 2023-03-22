@@ -11,7 +11,9 @@
 
 <body style="background-color: rgb(15,15,15); color: white;">
     <div class="container p-2">
-        <h1>Product Listing Page</h1>
+        <a href="" class="logo text-reset text-decoration-none d-inline-block">
+            <h1>Product Listing Page</h1>
+        </a>
         <div class="row">
             <div class="col-12 col-md-4">
                 <form>
@@ -50,17 +52,27 @@
 
     <script type="module">
         import { product } from "./product.js";
-        let arr, container, btn_search, search_list;
-        btn_search = document.querySelector(".search_btn");
-        container = document.querySelector(".container");
+        let arr;
+        let btn_search = document.querySelector(".search_btn");
+        let container = document.querySelector(".container");
+        let logo = document.querySelector(".logo");
 
         window.onload = function () {
             Create_Search_List();
             Search_Result_List();
         }
+
+        logo.addEventListener("click", reload);
+
+        function reload() {
+            document.querySelector(".product_search").value = "";
+            document.querySelector(".product_type").value = "All";
+            Create_Search_List();
+        }
+
         btn_search.addEventListener("click", Search_Result_List);
         function Search_Result_List() {
-            search_list = document.querySelector(".search_list");
+            let search_list = document.querySelector(".search_list");
             search_list.innerText = "";
             let search_condition_ProductType = document.querySelector("select").value;
             let search_condition_low_price = document.querySelector(".low_price").value;
@@ -68,11 +80,11 @@
             let search_condition_num_name = document.querySelector(".product_search").value;
             if (search_condition_low_price == "" || search_condition_low_price < 0) {
                 search_condition_low_price = 0;
-                document.querySelector(".low_price").value = "0";
+                document.querySelector(".low_price").value = "";
             }
             if (search_condition_high_price == "") {
                 search_condition_high_price = 2147483647;
-                document.querySelector(".high_price").value = "2147483647";
+                document.querySelector(".high_price").value = "";
             }
             if (search_condition_high_price < search_condition_low_price) {
                 let temp = search_condition_high_price;
@@ -100,26 +112,38 @@
                 arr.forEach(element => {
                     let div = document.createElement("div");
                     let img = document.createElement("img");
-                    let p;
+                    let _div;
                     img.setAttribute('src', 'https://picsum.photos/300/200/?random=10');
                     img.setAttribute('class', 'm-auto d-block w-100');
                     div.append(img);
                     div.setAttribute('class', 'col-12 col-md-3 p-2');
                     div.setAttribute('style', 'background-color: rgb(15,15,15); border: 1px solid white; color: white; position: relative;');
                     Object.entries(element).forEach(_element => {
-                        p = document.createElement("p");
-                        p.setAttribute('class', 'my-2');
+                        _div = document.createElement("p");
+                        _div.setAttribute('class', 'd-flex flex-wrap my-2');
                         if (_element[0] == "Amount" && _element[1] == 0) {
-                            p.innerText = `${_element[0]}: ${_element[1]}`;
-                            let hover = document.createElement("p");
-                            hover.setAttribute('style', 'color: red; position: absolute; left: 0; top: 0; right: 0; bottom: 0; font-size: 48px; background-color: #ffffff75;');
-                            hover.setAttribute('class', 'mb-0');
-                            hover.innerText = "Sold out";
-                            div.append(hover);
-                        } else {
-                            p.innerText = `${_element[0]}: ${_element[1]}`;
+                            let cover = document.createElement("p");
+                            cover.setAttribute('style', 'color: red; position: absolute; left: 0; top: 0; right: 0; bottom: 0; font-size: 48px; background-color: #ffffff75;');
+                            cover.setAttribute('class', 'mb-0');
+                            cover.innerText = "Sold out";
+                            div.append(cover);
                         }
-                        div.append(p);
+                        if (_element[0] == "ProductNumber") {
+                            _div.innerHTML = `<h3 class="d-block my-2" style="font-size: 24px;">${_element[1]}</h3>`;
+                        }
+                        else if (_element[0] == "ProductName") {
+                            _div.innerHTML = `<h3 class="d-block my-2" style="font-size: 24px;">${_element[1]}</h3>`;
+                        }
+                        else if (_element[0] == "Amount") {
+                            _div.innerHTML = `<p class="d-block my-2 w-50">數量:</p><p class="d-block my-2 w-50">${_element[1]}</p>`;
+                        }
+                        else if (_element[0] == "Price") {
+                            _div.innerHTML = `<p class="d-block my-2 w-50">價格:</p><p class="d-block my-2 w-50">${_element[1]}元</p>`;
+                        }
+                        else if (_element[0] == "ProductType") {
+                            _div.innerHTML = `<p class="d-block my-2 w-50">產品類型:</p><p class="d-block my-2 w-50">${_element[1]}</p>`;
+                        }
+                        div.append(_div);
                     });
                     search_list.append(div);
                 });
@@ -146,7 +170,7 @@
             });
             let uniq = [...new Set(arr_element)];
             let opt = document.createElement("option");
-            opt.innerHTML = `<option value="all">All</option>`;
+            opt.innerHTML = `<option value="All">All</option>`;
             select.append(opt);
             uniq.forEach(element => {
                 opt = document.createElement("option");
